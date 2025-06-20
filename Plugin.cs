@@ -7,7 +7,7 @@ using BananaOS;
 using System;
 using System.Collections.Generic;
 
-//Yes, I'm an American I spell it "color" not "colour" go cry about it.
+//Yes, I'm a Canadian, I spell it "colour" not "color", go cry about it.
 
 namespace MonkeClick
 {
@@ -35,10 +35,10 @@ namespace MonkeClick
             lineRenderer.enabled = false;
         }
 
-        public static void RefreshColor(Color newColor, LineRenderer line, int newColorIndex)
+        public static void RefreshColour(Color newColour, LineRenderer line, int newColourIndex)
         {
-            line.startColor = newColor;
-            line.endColor = newColor;
+            line.startColor = newColour;
+            line.endColor = newColour;
         }
 
             void FixedUpdate()
@@ -75,8 +75,8 @@ namespace MonkeClick
     {
         public override string Title => "Monke Click";
         public static bool active = false;
-        public static int colorIndex = 0;
-        public static List<Tuple<string, Color>> colors = new List<Tuple<string, Color>>
+        public static int colourIndex = 0;
+        public static List<Tuple<string, Color>> colours = new List<Tuple<string, Color>>
         {
             Tuple.Create("white", Color.white),
             Tuple.Create("red", Color.red),
@@ -100,7 +100,7 @@ namespace MonkeClick
                 var stringBuilder = new StringBuilder();
                 stringBuilder.AppendLine($"<color=yellow>==</color> Monke Click <color=yellow>==</color>");
                 stringBuilder.AppendLine(selectionHandler.GetOriginalBananaOSSelectionText(0, $"activity: {(active?"enabled":"disabled")}"));
-                stringBuilder.AppendLine(selectionHandler.GetOriginalBananaOSSelectionText(1, $"color: {colors[colorIndex].Item1}"));
+                stringBuilder.AppendLine(selectionHandler.GetOriginalBananaOSSelectionText(1, $"colour: {colors[colorIndex].Item1}"));
                 return stringBuilder.ToString();
             }
 
@@ -120,13 +120,13 @@ namespace MonkeClick
                     if (selectionHandler.currentIndex == 0) active = !active;
                     else
                     {
-                        colorIndex += 1;
+                        colourIndex += 1;
 
-                        if (colorIndex > colors.Count - 1)
+                        if (colourIndex > colours.Count - 1)
                         {
-                            colorIndex = 0;
+                            colourIndex = 0;
                         }
-                        Plugin.RefreshColor(colors[colorIndex].Item2, Plugin.lineRenderer, colorIndex);
+                        Plugin.RefreshColour(colours[colorIndex].Item2, Plugin.lineRenderer, colourIndex);
                     }
 
                         break;
