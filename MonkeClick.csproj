@@ -17,9 +17,6 @@
     <Reference Include="BakeryRuntimeAssembly">
       <HintPath>$(GameAssemblyPath)\BakeryRuntimeAssembly.dll</HintPath>
     </Reference>
-    <Reference Include="BananaOS">
-      <HintPath>..\..\..\Desktop\Banana OS\BananaOS.dll</HintPath>
-    </Reference>
     <Reference Include="BepInEx">
       <HintPath>$(BepInExAssemblyPath)\BepInEx.dll</HintPath>
     </Reference>
