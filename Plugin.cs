@@ -18,12 +18,14 @@ namespace MonkeClick
     [BepInDependency("dev.gorillainfowatch", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
+        public static bool useRightHand = true; 
         public static LineRenderer lineRenderer;
         public static bool active = false;
         public static int colorIndex = 0;
         public static List<Tuple<string, Color>> colors = new List<Tuple<string, Color>>
+
         {
-            Tuple.Create("orange", new Color(1f, 0.5f, 0f)),
+            
             Tuple.Create("white", Color.white),
             Tuple.Create("red", Color.red),
             Tuple.Create("green", Color.green),
@@ -33,6 +35,7 @@ namespace MonkeClick
             Tuple.Create("magenta", Color.magenta),
             Tuple.Create("black", Color.black),
             Tuple.Create("purple", new Color(0.5f, 0f, 0.5f)),
+            Tuple.Create("orange", new Color(1f, 0.5f, 0f)),
             Tuple.Create("pink", new Color(1f, 0.75f, 0.8f)),
             Tuple.Create("brown", new Color(0.6f, 0.3f, 0f)),
             Tuple.Create("gray", Color.gray),
@@ -147,15 +150,21 @@ namespace MonkeClick
         {
             if (lineRenderer == null || GTPlayer.Instance == null) return;
 
-            lineRenderer.SetPosition(0, GTPlayer.Instance.rightControllerTransform.position);
+            // Hand config stuff
+            Transform handTransform = Plugin.useRightHand ? GTPlayer.Instance.rightControllerTransform : GTPlayer.Instance.leftControllerTransform;
+            bool grabPressed = Plugin.useRightHand ? ControllerInputPoller.instance.rightGrab : ControllerInputPoller.instance.leftGrab;
+            float indexTrigger = Plugin.useRightHand ? ControllerInputPoller.instance.rightControllerIndexFloat : ControllerInputPoller.instance.leftControllerIndexFloat;
+            Transform handTriggerCollider = Plugin.useRightHand ? GorillaTagger.Instance.rightHandTriggerCollider.transform : GorillaTagger.Instance.leftHandTriggerCollider.transform;
 
-            if (ControllerInputPoller.instance.rightGrab && active)
+            lineRenderer.SetPosition(0, handTransform.position);
+
+            if (grabPressed && Plugin.active)
             {
                 lineRenderer.enabled = true;
 
                 var hits = Physics.RaycastAll(
-                    GTPlayer.Instance.rightControllerTransform.position,
-                    GTPlayer.Instance.rightControllerTransform.forward,
+                    handTransform.position,
+                    handTransform.forward,
                     Mathf.Infinity,
                     ~(1 << LayerMask.NameToLayer("Gorilla Boundary"))
                 );
@@ -164,10 +173,9 @@ namespace MonkeClick
                 foreach (var hit in hits)
                 {
                     lineRenderer.SetPosition(1, hit.point);
-                    if (ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f &&
-                        hit.transform.gameObject.layer == 18)
+                    if (indexTrigger > 0.5f && hit.transform.gameObject.layer == 18)
                     {
-                        GorillaTagger.Instance.rightHandTriggerCollider.transform.position = hit.point;
+                        handTriggerCollider.position = hit.point;
                         break;
                     }
                 }
@@ -177,6 +185,8 @@ namespace MonkeClick
                 lineRenderer.enabled = false;
             }
         }
+
+
 
         public static void RefreshColor(Color newColor)
         {
@@ -247,11 +257,15 @@ namespace MonkeClick
         public override ScreenContent GetContent()
         {
             var lines = new LineBuilder();
+
             lines.Add($"Status: {(Plugin.active ? "Enabled" : "Disabled")}",
-    new List<Widget_Base> { new Widget_PushButton(OnToggleActive) });
+                new List<Widget_Base> { new Widget_PushButton(OnToggleActive) });
 
             lines.Add($"Colour: {Plugin.colors[Plugin.colorIndex].Item1}",
                 new List<Widget_Base> { new Widget_PushButton(OnCycleColor) });
+
+            lines.Add($"Hand: {(Plugin.useRightHand ? "Right" : "Left")}",
+                new List<Widget_Base> { new Widget_PushButton(OnToggleHand) });
 
             return lines;
         }
@@ -268,5 +282,12 @@ namespace MonkeClick
             Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
             SetContent();
         }
+
+        private void OnToggleHand(object[] args)
+        {
+            Plugin.useRightHand = !Plugin.useRightHand;
+            SetContent();
+        }
     }
+
 }
