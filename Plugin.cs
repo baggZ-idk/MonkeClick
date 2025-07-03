@@ -10,10 +10,12 @@ using UnityEngine;
 using GorillaInfoWatch.Attributes;
 using GorillaInfoWatch.Models;
 using GorillaInfoWatch.Models.Widgets;
+using System.Linq;
+using Photon.Pun;
 
 namespace MonkeClick
 {
-    [BepInPlugin("baggz.monkeclick", "MonkeClick", "1.0.0")]
+    [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     //[BepInDependency("Husky.BananaOS", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("dev.gorillainfowatch", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
@@ -133,6 +135,12 @@ namespace MonkeClick
             }
 
             GorillaTagger.OnPlayerSpawned(OnGameInitialized);
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
+            {
+                {
+                    PluginInfo.HashKey, PluginInfo.Version
+                }
+            });
         }
 
         void OnGameInitialized()
@@ -262,7 +270,11 @@ namespace MonkeClick
                 new List<Widget_Base> { new Widget_PushButton(OnToggleActive) });
 
             lines.Add($"Colour: {Plugin.colors[Plugin.colorIndex].Item1}",
-                new List<Widget_Base> { new Widget_PushButton(OnCycleColor) });
+                new List<Widget_Base>
+                {
+                new Widget_PushButton(OnPreviousColor),
+                new Widget_PushButton(OnNextColor)
+                });
 
             lines.Add($"Hand: {(Plugin.useRightHand ? "Right" : "Left")}",
                 new List<Widget_Base> { new Widget_PushButton(OnToggleHand) });
@@ -276,7 +288,14 @@ namespace MonkeClick
             SetContent();
         }
 
-        private void OnCycleColor(object[] args)
+        private void OnPreviousColor(object[] args)
+        {
+            Plugin.colorIndex = (Plugin.colorIndex - 1 + Plugin.colors.Count) % Plugin.colors.Count;
+            Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
+            SetContent();
+        }
+
+        private void OnNextColor(object[] args)
         {
             Plugin.colorIndex = (Plugin.colorIndex + 1) % Plugin.colors.Count;
             Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
@@ -289,5 +308,7 @@ namespace MonkeClick
             SetContent();
         }
     }
+
+
 
 }
