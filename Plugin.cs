@@ -87,12 +87,19 @@ namespace MonkeClick
             {
                 lineRenderer.enabled = true;
 
+                //Better angle, doesnt just point up. So more comfy?
+                float angleOffset = 30f;
+
+                Vector3 rotatedDirection = Quaternion.AngleAxis(angleOffset, handTransform.right) * handTransform.forward;
+
                 var hits = Physics.RaycastAll(
                     handTransform.position,
-                    handTransform.forward,
+                    rotatedDirection,
                     Mathf.Infinity,
                     ~(1 << LayerMask.NameToLayer("Gorilla Boundary"))
                 );
+
+
                 Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
                 foreach (var hit in hits)
