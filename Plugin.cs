@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Collections.Generic;
 using System;
 using BepInEx;
@@ -10,6 +10,8 @@ using GorillaInfoWatch.Models;
 using GorillaInfoWatch.Models.Widgets;
 using System.Linq;
 using Photon.Pun;
+
+[assembly: InfoWatchCompatible]
 
 namespace MonkeClick
 {
@@ -24,7 +26,7 @@ namespace MonkeClick
         public static List<Tuple<string, Color>> colors = new List<Tuple<string, Color>>
 
         {
-            
+            Tuple.Create("RGB", Color.white),
             Tuple.Create("white", Color.white),
             Tuple.Create("red", Color.red),
             Tuple.Create("green", Color.green),
@@ -85,9 +87,16 @@ namespace MonkeClick
 
             if (grabPressed && Plugin.active)
             {
+                if (colors[colorIndex].Item1 == "RGB")
+                {
+                    float hue = (Time.time * 0.2f) % 1f; 
+                    Color rainbowColor = Color.HSVToRGB(hue, 1f, 1f);
+
+                    RefreshColor(rainbowColor);
+                }
+
                 lineRenderer.enabled = true;
 
-                //Better angle, doesnt just point up. So more comfy?
                 float angleOffset = 30f;
 
                 Vector3 rotatedDirection = Quaternion.AngleAxis(angleOffset, handTransform.right) * handTransform.forward;
@@ -130,8 +139,11 @@ namespace MonkeClick
         }
     }
 
+    
+
     // GorillaInfoWatch Screen implementation
-    [ShowOnHomeScreen]
+    [ShowOnHomeScreen(DisplayTitle = "Monke Click")]
+
     internal class InfoWatchPage : GorillaInfoWatch.Models.InfoWatchScreen
     {
         public override string Title => "Monke Click";
@@ -143,7 +155,7 @@ namespace MonkeClick
             lines.Add($"Status: {(Plugin.active ? "Enabled" : "Disabled")}",
                 new List<Widget_Base> { new Widget_PushButton(OnToggleActive) });
 
-            lines.Add($"Color: {Plugin.colors[Plugin.colorIndex].Item1}",
+            lines.Add($"Colour: {Plugin.colors[Plugin.colorIndex].Item1}",
                 new List<Widget_Base>
                 {
                 new Widget_PushButton(OnPreviousColor),
@@ -165,16 +177,19 @@ namespace MonkeClick
         private void OnPreviousColor(object[] args)
         {
             Plugin.colorIndex = (Plugin.colorIndex - 1 + Plugin.colors.Count) % Plugin.colors.Count;
-            Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
+            if (Plugin.colors[Plugin.colorIndex].Item1 != "rainbow")
+                Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
             SetContent();
         }
 
         private void OnNextColor(object[] args)
         {
             Plugin.colorIndex = (Plugin.colorIndex + 1) % Plugin.colors.Count;
-            Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
+            if (Plugin.colors[Plugin.colorIndex].Item1 != "rainbow")
+                Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
             SetContent();
         }
+
 
         private void OnToggleHand(object[] args)
         {
@@ -182,4 +197,7 @@ namespace MonkeClick
             SetContent();
         }
     }
+
+
+
 }
