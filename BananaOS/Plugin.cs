@@ -5,13 +5,10 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using GorillaLocomotion;
 using UnityEngine;
-using GorillaInfoWatch.Attributes;
-using GorillaInfoWatch.Models;
-using GorillaInfoWatch.Models.Widgets;
+using BananaOS;
+using BananaOS.Pages;
 using System.Linq;
 using Photon.Pun;
-
-[assembly: InfoWatchCompatible]
 
 namespace MonkeClick
 {
@@ -139,65 +136,61 @@ namespace MonkeClick
         }
     }
 
-    
+
 
     // GorillaInfoWatch Screen implementation
-    [ShowOnHomeScreen(DisplayTitle = "Monke Click")]
-
-    internal class InfoWatchPage : GorillaInfoWatch.Models.InfoWatchScreen
+    public class Page : WatchPage
     {
         public override string Title => "Monke Click";
+        public static bool active = false;
+        public static int colorIndex = 0;
+        public override bool DisplayOnMainMenu => true;
 
-        public override ScreenContent GetContent()
+        public override void OnPostModSetup()
         {
-            var lines = new LineBuilder();
-
-            lines.Add($"Status: {(Plugin.active ? "Enabled" : "Disabled")}",
-                new List<Widget_Base> { new Widget_PushButton(OnToggleActive) });
-
-            lines.Add($"Colour: {Plugin.colors[Plugin.colorIndex].Item1}",
-                new List<Widget_Base>
-                {
-                new Widget_PushButton(OnPreviousColor),
-                new Widget_PushButton(OnNextColor)
-                });
-
-            lines.Add($"Hand: {(Plugin.useRightHand ? "Right" : "Left")}",
-                new List<Widget_Base> { new Widget_PushButton(OnToggleHand) });
-
-            return lines;
+            selectionHandler.maxIndex = 1;
         }
 
-        private void OnToggleActive(object[] args)
+        public override string OnGetScreenContent()
         {
-            Plugin.active = !Plugin.active;
-            SetContent();
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"<color=yellow>==</color> Monke Click <color=yellow>==</color>");
+            stringBuilder.AppendLine(selectionHandler.GetOriginalBananaOSSelectionText(0, $"activity: {(active ? "enabled" : "disabled")}"));
+            stringBuilder.AppendLine(selectionHandler.GetOriginalBananaOSSelectionText(1, $"color: {Plugin.colors[colorIndex].Item1}"));
+            return stringBuilder.ToString();
         }
 
-        private void OnPreviousColor(object[] args)
+        public override void OnButtonPressed(WatchButtonType buttonType)
         {
-            Plugin.colorIndex = (Plugin.colorIndex - 1 + Plugin.colors.Count) % Plugin.colors.Count;
-            if (Plugin.colors[Plugin.colorIndex].Item1 != "rainbow")
-                Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
-            SetContent();
-        }
+            switch (buttonType)
+            {
+                case WatchButtonType.Up:
+                    selectionHandler.MoveSelectionUp();
+                    break;
 
-        private void OnNextColor(object[] args)
-        {
-            Plugin.colorIndex = (Plugin.colorIndex + 1) % Plugin.colors.Count;
-            if (Plugin.colors[Plugin.colorIndex].Item1 != "rainbow")
-                Plugin.RefreshColor(Plugin.colors[Plugin.colorIndex].Item2);
-            SetContent();
-        }
+                case WatchButtonType.Down:
+                    selectionHandler.MoveSelectionDown();
+                    break;
 
+                case WatchButtonType.Enter:
+                    if (selectionHandler.currentIndex == 0) active = !active;
+                    else
+                    {
+                        colorIndex += 1;
 
-        private void OnToggleHand(object[] args)
-        {
-            Plugin.useRightHand = !Plugin.useRightHand;
-            SetContent();
+                        if (colorIndex > Plugin.colors.Count - 1)
+                        {
+                            colorIndex = 0;
+                        }
+                        Plugin.RefreshColor(Plugin.colors[colorIndex].Item2);
+                    }
+
+                    break;
+
+                case WatchButtonType.Back:
+                    ReturnToMainMenu();
+                    break;
+            }
         }
     }
-
-
-
 }
