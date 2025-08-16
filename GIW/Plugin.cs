@@ -5,11 +5,11 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using GorillaLocomotion;
 using UnityEngine;
-using GorillaInfoWatch.Attributes;
 using GorillaInfoWatch.Models;
 using GorillaInfoWatch.Models.Widgets;
 using System.Linq;
 using Photon.Pun;
+using GorillaInfoWatch.Models.Attributes;
 
 [assembly: InfoWatchCompatible]
 
@@ -144,11 +144,11 @@ namespace MonkeClick
     // GorillaInfoWatch Screen implementation
     [ShowOnHomeScreen(DisplayTitle = "Monke Click")]
 
-    internal class InfoWatchPage : GorillaInfoWatch.Models.InfoWatchScreen
+    internal class InfoWatchPage : GorillaInfoWatch.Models.Screen
     {
         public override string Title => "Monke Click";
 
-        public override ScreenContent GetContent()
+        public override ScreenLines GetContent()
         {
             var lines = new LineBuilder();
 
