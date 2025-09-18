@@ -51,12 +51,6 @@ namespace MonkeClick
             }
 
             GorillaTagger.OnPlayerSpawned(OnGameInitialized);
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable()
-            {
-                {
-                    PluginInfo.HashKey, PluginInfo.Version
-                }
-            });
         }
 
         void OnGameInitialized()
