@@ -1,15 +1,11 @@
-using System.Text;
 using System.Collections.Generic;
 using System;
 using BepInEx;
-using BepInEx.Bootstrap;
 using GorillaLocomotion;
 using UnityEngine;
+using GorillaInfoWatch.Models.Attributes;
 using GorillaInfoWatch.Models;
 using GorillaInfoWatch.Models.Widgets;
-using System.Linq;
-using Photon.Pun;
-using GorillaInfoWatch.Models.Attributes;
 
 [assembly: InfoWatchCompatible]
 
@@ -42,19 +38,7 @@ namespace MonkeClick
             Tuple.Create("gray", Color.gray),
         };
 
-        void Start()
-        {
-            bool hasInfo = Chainloader.PluginInfos.ContainsKey("dev.gorillainfowatch");
-
-            if (!hasInfo)
-            {
-                Logger.LogError($"MonkeClick requires GorillaInfoWatch.");
-                this.enabled = false;
-                return;
-            }
-
-            GorillaTagger.OnPlayerSpawned(OnGameInitialized);
-        }
+        void Start() => GorillaTagger.OnPlayerSpawned(OnGameInitialized);
 
         void OnGameInitialized()
         {
@@ -138,11 +122,11 @@ namespace MonkeClick
     // GorillaInfoWatch Screen implementation
     [ShowOnHomeScreen(DisplayTitle = "Monke Click")]
 
-    internal class InfoWatchPage : GorillaInfoWatch.Models.Screen
+    internal class InfoWatchPage : InfoScreen
     {
         public override string Title => "Monke Click";
 
-        public override ScreenLines GetContent()
+        public override InfoContent GetContent()
         {
             var lines = new LineBuilder();
 
