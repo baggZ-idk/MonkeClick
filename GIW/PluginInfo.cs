@@ -7,7 +7,6 @@
     {
         public const string GUID = "baggz.zlothy.monkeclick";
         public const string Name = "MonkeClick";
-        public const string HashKey = "github.com/ZlothY29IQ/MonkeClick";
-        public const string Version = "1.0.3";
+        public const string Version = "1.0.4";
     }
 }
